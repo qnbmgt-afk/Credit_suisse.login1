@@ -787,9 +787,405 @@ button:active {
         </div>
       </div>
     </div>
+
+      <!-- DASHBOARD -->
+  <div id="dashboard" class="hidden">
+    <div class="dash-wrapper">
+      <div class="sidebar">
+        <a href="#" onclick="showSection('overview')">Account overview</a>
+        <a href="#" onclick="showSection('payments')">Payments</a>
+        <a href="#" onclick="showSection('transactions')">Transactions</a>
+        <a href="#" onclick="showSection('investments')">Investments</a>
+        <a href="#" onclick="showSection('portfolio')">Portfolio</a>
+        <a href="#" onclick="showSection('markets')">Market Services</a>
+        <a href="#" onclick="showSection('settings')">Settings</a>
+        <a href="#" onclick="openSupport()">Contact Support</a>
+        <a href="#" onclick="logout()">Log out</a>
+      </div>
+      <div class="dashboard-content">
+        <!-- Overview -->
+        <div id="overview" class="panel overview-panel">
+          <h2>Account overview</h2>
+          <div class="muted" style="margin-bottom:10px;">Current balance</div>
+          <div class="balance" id="balanceDisplay"></div>
+          <div style="margin-top:auto;">
+            <button onclick="showSection('payments')">Make a Transfer</button>
+          </div>
+        </div>
+        <div id="recentSection" class="recent-transactions-simple">
+          <h3>Recent Transactions</h3>
+          <div class="view-all" onclick="goToTransactions()">View all transactions →</div>
+        </div>
+
+        <!-- Payments -->
+        <div id="payments" class="panel hidden">
+          <h2>Payments</h2>
+          <button class="qr-bill-btn" onclick="openQRScanner()" style="margin-bottom: 20px;">📱 Scan QR-Bill</button>
+          <div id="transferMessage" class="muted hidden" style="margin-bottom:14px;padding:10px;border-radius:4px;font-size:14px;"></div>
+          <!-- STEP 1 -->
+          <div id="transferStep1">
+            <label>Select Transfer Type</label>
+            <select id="transferType">
+              <option value="">-- Select --</option>
+              <option value="sepa">SEPA Transfer</option>
+              <option value="wire">International Wire</option>
+              <option value="internal">Internal Transfer</option>
+              <option value="fx">FX Transfer</option>
+            </select>
+            <div id="transferBanner" style="display:none; margin:10px 0; padding:10px 14px; border-radius:4px; font-size:14px; color:#fff;"></div>
+            <button onclick="nextTransferStep()">Continue</button>
+          </div>
+          <!-- STEP 2 -->
+          <div id="transferStep2" class="hidden">
+            <label>Beneficiary Name</label><input type="text" id="beneficiaryName" placeholder="Full Name">
+            <label>Bank Name</label><input type="text" id="bankName" placeholder="Bank Name">
+            <label>IBAN / Account Number</label><input type="text" id="accountNumber" placeholder="IBAN or Account Number">
+            <label>SWIFT / BIC</label><input type="text" id="swiftBic" placeholder="SWIFT / BIC">
+            <label>Country</label><input type="text" id="country" placeholder="Country">
+            <label>Amount (CHF)</label><input type="text" id="transferAmount" placeholder="0.00">
+            <small style="color:#6b7280; margin-top:-15px; margin-bottom:15px; display:block;">Only CHF transfers are supported</small>
+            <label>Reference</label><input type="text" id="transferReference" placeholder="Reference">
+            <div id="transferBanner2" style="display:none; margin:10px 0; padding:10px 14px; border-radius:4px; font-size:14px; color:#fff;"></div>
+            <button onclick="nextTransferStep()">Review Transfer</button>
+          </div>
+          <!-- STEP 3 (COT) REMOVED – replaced by confirmation modal -->
+        </div>
+
+        <!-- Transactions Table -->
+        <div id="transactions" class="panel">
+          <h2>Recent transactions</h2>
+          <table class="table" id="transactionTable">
+            <thead><tr><th>Date</th><th>Description</th><th>Amount</th></tr></thead>
+            <tbody id="transactionTableBody"></tbody>
+          </table>
+        </div>
+
+        <!-- Transaction Modal -->
+        <div id="transactionModal" class="modal">
+          <div class="modal-content">
+            <div style="background:#0a1f44; padding:15px 0; text-align:center; width:100%; border-top-left-radius:10px; border-top-right-radius:10px;">
+              <img src="https://res.cloudinary.com/do9yjpizs/image/upload/v1771185812/wn6e9zmpiinkjfeydgna.png" style="height:35px;">
+            </div>
+            <h3 style="margin-bottom:20px;">Transaction Details</h3>
+            <div class="detail-row"><span>Date</span><span id="detailDate"></span></div>
+            <div class="detail-row"><span>Description</span><span id="detailDescription"></span></div>
+            <div class="detail-row"><span>Amount</span><span id="detailAmount"></span></div>
+            <div class="detail-row"><span>Reference</span><span id="detailReference"></span></div>
+            <div class="detail-row"><span>Status</span><span id="detailStatus"></span></div>
+            <button onclick="closeModal()" style="background-color: #003366; color: #ffffff; border: none; padding: 10px 15px; border-radius: 5px; cursor: pointer; margin-top:20px;">Close</button>
+          </div>
+        </div>
+
+        <!-- Investments -->
+        <div id="investments" class="panel hidden">
+          <h2>Investments</h2>
+          <table class="table">
+            <thead><tr><th>Asset</th><th>Quantity</th><th>Value (CHF)</th><th>Performance</th></tr></thead>
+            <tbody><tr><td colspan="4" style="text-align:center; padding:30px;">No investments yet</td></tr></tbody>
+          </table>
+          <button class="generate-report-btn" onclick="generateValuationReport()">📊 Generate Valuation Report</button>
+          <canvas id="investmentsChart" width="400" height="200"></canvas>
+          <div id="investmentsLegend" style="margin-top:12px;font-size:13px;color:#374151;"></div>
+          <div id="investmentsSummary" style="margin-top:16px;padding:12px;background:#f0f2f5;border-radius:6px;font-size:14px;color:#1a1a1a;"></div>
+          <div id="reportResult" style="margin-top:16px;padding:12px;background:#f0f2f5;border-radius:6px;font-size:14px;color:#1a1a1a; display:none;"></div>
+        </div>
+
+        <!-- Portfolio -->
+        <div id="portfolio" class="panel hidden">
+          <h2>Portfolio</h2>
+          <p class="muted">Net worth summary</p>
+          <canvas id="portfolioChart" width="300" height="200"></canvas>
+        </div>
+
+        <!-- Markets (restored) -->
+        <div id="markets" class="panel hidden">
+          <h2>Market Services</h2>
+          <div style="background:#f0f2f5;border-radius:4px;padding:10px;font-size:13px;color:#1a1a1a;margin-bottom:16px;">
+            <marquee>SMI +0.8% | Nestlé -0.5% | UBS +1.2% | Credit Suisse Fund +3.2%</marquee>
+          </div>
+          <div id="newsFeed" style="background:#fff;border-radius:6px;box-shadow:0 4px 12px rgba(0,0,0,0.08);padding:16px;font-size:14px;color:#1a1a1a;">
+            <h3 style="margin-top:0;font-size:16px;color:#002a5c;">Latest Market News</h3>
+            <ul id="newsList" style="list-style:none;padding:0;margin:0;"></ul>
+          </div>
+        </div>
+
+        <!-- Settings -->
+        <div id="settings" class="panel hidden">
+          <h2>Settings</h2>
+          <div class="settings-section">
+            <button class="section-toggle">Account Details</button>
+            <div class="section-content">
+              <p><strong>Account Holder:</strong> Valentina Aragort</p>
+              <p><strong>Account Type:</strong> CSX Pro</p>
+              <p><strong>Account Number:</strong> 623852957</p>
+              <p><strong>IBAN:</strong> CH93 0076 2011 6238 5295 7</p>
+              <p><strong>SWIFT / BIC:</strong> CRESCHZZ80A</p>
+              <p><strong>Bank:</strong> Credit Suisse AG</p>
+              <p><strong>Branch:</strong> Zurich – Paradeplatz</p>
+              <p><strong>Country:</strong> Switzerland</p>
+              <p><strong>Relationship Manager:</strong> Anna Keller</p>
+              <button class="rm-button" onclick="window.location.href='mailto:credit-suisse.account.mgt@accountant.com?subject=Inquiry%20from%20Online%20Banking%20Client&body=Dear%20Relationship%20Manager%2C%0A%0AI%20would%20like%20to%20inquire%20about%3A%0A%0A%0AThank%20you%20for%20your%20assistance.%0A%0ABest%20regards%2C%0A%5BClient%20Name%5D'">Contact Relationship Manager</button>
+            </div>
+          </div>
+          <div class="settings-section">
+            <button class="section-toggle">Change Password</button>
+            <div class="section-content">
+              <label>Current Password</label><input type="password" id="oldPassword">
+              <label>New Password</label><input type="password" id="newPassword">
+              <label>Confirm Password</label><input type="password" id="confirmPassword">
+              <button onclick="changePassword()">Change Password</button>
+              <div id="passwordMsg" style="margin-top:8px; display:none;"></div>
+            </div>
+          </div>
+          <div class="settings-section">
+            <button class="section-toggle">Two-Factor Authentication</button>
+            <div class="section-content">
+              <label><input type="checkbox" id="toggle2FA" onchange="toggle2FA()"> Enable 2FA</label>
+            </div>
+          </div>
+          <div class="settings-section">
+            <button class="section-toggle">Security Events</button>
+            <div class="section-content">
+              <ul id="securityEvents" style="padding-left:0;"></ul>
+            </div>
+          </div>
+        </div>
+      </div>
+      <footer style="text-align:center;font-size:12px;color:#6b7280;margin:20px 0;">
+        © 2026 Credit Suisse. All rights reserved. | Privacy Policy | Legal Notice | Cookies
+      </footer>
+    </div>
   </div>
 
-      // Forgot password functions (unchanged)
+  <!-- QR Scanner Modal -->
+  <div id="qrScannerModal" class="qr-modal">
+    <div class="qr-modal-content">
+      <h3>Scan QR-Bill</h3>
+      <div class="qr-scanner-placeholder">
+        <div style="text-align: center;">
+          <div style="font-size: 48px; margin-bottom: 10px;">📷</div>
+          <p style="color: #6b7280;">Camera preview would appear here</p>
+          <p style="font-size: 12px; color: #999;">Position QR code in frame</p>
+        </div>
+      </div>
+      <div style="display: flex; gap: 10px;">
+        <button onclick="scanQR()" style="flex: 2;">Scan</button>
+        <button onclick="closeQRScanner()" class="qr-close-btn" style="flex: 1;">Close</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Forgot Password Modal -->
+  <div id="forgotPasswordModal" class="modal">
+    <div class="modal-content forgot-modal-content">
+      <span class="close-btn" onclick="closeForgotPasswordModal()">✕</span>
+      <h3 style="color: #002a5c; margin-bottom: 20px; text-align: center;">Reset Password</h3>
+      <p style="color: #4b5563; text-align: center; margin-bottom: 25px;">Reset your password to the original one you created your account with?</p>
+      <button onclick="resetToOriginalPassword()" style="margin-bottom: 15px;">Reset to Original</button>
+      <div style="text-align: center;"><a href="#" class="cancel-link" onclick="closeForgotPasswordModal()">Cancel</a></div>
+      <div class="support-text">Need help? <a href="#" onclick="openSupport(); closeForgotPasswordModal(); return false;">Contact Support</a></div>
+      <div id="resetSuccessMessage" class="reset-success" style="display: none;">Password reset successfully! You can now log in with your original password.</div>
+    </div>
+  </div>
+
+  <!-- Device Block Error Modal -->
+  <div id="deviceBlockModal" class="modal">
+    <div class="modal-content">
+      <h3 style="color: #b91c1c; margin-bottom: 15px;">Access Denied</h3>
+      <p style="color: #4b5563; margin-bottom: 20px;">This account can only be accessed from the browser first used on this device.</p>
+      <p style="color: #4b5563; margin-bottom: 25px;">Please use the original browser or <a href="#" onclick="openSupport(); closeDeviceBlockModal(); return false;" style="color: #003a8f;">contact support</a> for assistance.</p>
+      <button onclick="closeDeviceBlockModal()" style="background: #6b7280;">OK</button>
+    </div>
+  </div>
+
+  <!-- Chrome Restriction Modal (new) -->
+  <div id="chromeRestrictionModal" class="modal">
+    <div class="modal-content">
+      <h3 style="color: #b91c1c; margin-bottom: 15px;">Browser Not Supported</h3>
+      <p style="color: #4b5563; margin-bottom: 20px;">This site is optimized for Chrome/Chromium browser Mobile. Please use Chrome/Chromium browser Mobile to access your account.</p>
+      <button onclick="closeChromeRestrictionModal()" style="background: #6b7280;">OK</button>
+    </div>
+  </div>
+
+  <!-- Transfer Confirmation Modal (replaces COT) -->
+  <div id="confirmTransferModal" class="modal">
+    <div class="modal-content">
+      <h3 style="color: #002a5c; margin-bottom: 20px;">Confirm Transfer</h3>
+      <div id="confirmDetails" class="confirm-details">
+        <p><strong>Beneficiary:</strong> <span id="confirmBeneficiary"></span></p>
+        <p><strong>Amount:</strong> <span id="confirmAmount"></span></p>
+      </div>
+      <div class="modal-buttons">
+        <button onclick="confirmTransfer()" style="background: #002a5c;">Confirm</button>
+        <button onclick="closeConfirmTransferModal()" style="background: #6b7280;">Cancel</button>
+      </div>
+    </div>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@3/dist/email.min.js"></script>
+  <script>
+    // ===== INITIALIZATION =====
+    (function() {
+      emailjs.init("pDefyPQfc_lW2Cdcu");
+    })();
+
+    // ===== CHROME DETECTION =====
+    function isChrome() {
+      const ua = navigator.userAgent;
+      return /Chrome/.test(ua) && !/Edg/.test(ua) && !/OPR/.test(ua);
+    }
+
+    // ===== CHROME RESTRICTION MODAL =====
+    function showChromeRestrictionModal() {
+      document.getElementById('chromeRestrictionModal').classList.add('show');
+    }
+    function closeChromeRestrictionModal() {
+      document.getElementById('chromeRestrictionModal').classList.remove('show');
+    }
+
+    // ===== CREDENTIALS =====
+    const encodedUser = btoa('Valentina.Aragort10@gmail.com');
+    const STORAGE_KEY = 'bankState';
+
+    // ===== DEVICE FINGERPRINT (unchanged) =====
+    const DEVICE_ID_KEY = 'creditSuisse_deviceId';
+    const DEVICE_REGISTERED_KEY = 'creditSuisse_deviceRegistered';
+    function generateDeviceFingerprint() {
+      const components = [
+        navigator.userAgent,
+        navigator.language,
+        screen.width + 'x' + screen.height,
+        new Date().getTimezoneOffset(),
+        navigator.hardwareConcurrency || 'unknown',
+        screen.colorDepth,
+        navigator.platform || 'unknown'
+      ];
+      return btoa(components.join('|'));
+    }
+    function checkDeviceAllowed() {
+      const isRegistered = localStorage.getItem(DEVICE_REGISTERED_KEY);
+      const currentDeviceId = generateDeviceFingerprint();
+      if (!isRegistered) {
+        localStorage.setItem(DEVICE_ID_KEY, currentDeviceId);
+        localStorage.setItem(DEVICE_REGISTERED_KEY, 'true');
+        return { allowed: true, isFirst: true };
+      } else {
+        const storedDeviceId = localStorage.getItem(DEVICE_ID_KEY);
+        if (currentDeviceId === storedDeviceId) {
+          return { allowed: true, isFirst: false };
+        } else {
+          return { allowed: false, isFirst: false };
+        }
+      }
+    }
+
+    // ===== APPROVED ACCOUNTS =====
+    const APPROVED_ACCOUNTS = [
+      '40-02-28 41758239', '20-45-78 56918372', '10070000 3920184756',
+      '20040000 8473629105', '021000021 417829365', '026009593 628194735',
+      '003-12345 4128396', '30004 12345 03928471629', '0483 3128456 79',
+      '062-123 417829365'
+    ];
+
+    // ===== STATE =====
+    function loadState() {
+      const saved = localStorage.getItem(STORAGE_KEY);
+      if (saved) return JSON.parse(saved);
+      return {
+        credentials: {
+          encodedPass: btoa('0123456789111'),
+          twoFactorEnabled: true
+        },
+        security: { events: [] }
+      };
+    }
+    function saveState() { localStorage.setItem(STORAGE_KEY, JSON.stringify(state)); }
+    let state = loadState();
+    let encodedPass = state.credentials.encodedPass;
+    let twoFactorEnabled = state.credentials.twoFactorEnabled;
+
+    function addSecurityEvent(type) {
+      const event = { type, timestamp: new Date().toLocaleString(), device: navigator.userAgent.split(')')[0] + ')' };
+      state.security.events.unshift(event);
+      saveState();
+      renderSecurityEvents();
+    }
+    function renderSecurityEvents() {
+      const list = document.getElementById('securityEvents');
+      if (!list) return;
+      list.innerHTML = '';
+      state.security.events.slice(0, 10).forEach(e => {
+        const li = document.createElement('li');
+        li.style.marginBottom = '8px';
+        li.innerHTML = `<strong>${e.type}</strong><br><span class="muted">${e.timestamp} · ${e.device}</span>`;
+        list.appendChild(li);
+      });
+    }
+
+    function showTempError(elementId, duration = 3000) {
+      const el = document.getElementById(elementId);
+      if (!el) return;
+      el.style.display = 'block';
+      setTimeout(() => { el.style.display = 'none'; }, duration);
+    }
+
+    // ===== LOGIN with Chrome modal =====
+    function login() {
+      if (false &&!isChrome()) {
+        showChromeRestrictionModal();
+        return;
+      }
+      const deviceCheck = checkDeviceAllowed();
+      if (false &&!deviceCheck.allowed) {
+        document.getElementById('deviceBlockModal').classList.add('show');
+        return;
+      }
+      const u = document.getElementById('user').value;
+      const p = document.getElementById('pass').value;
+      if (btoa(u) === encodedUser && btoa(p) === encodedPass) {
+        addSecurityEvent('LOGIN_SUCCESS');
+        document.getElementById('loginError').style.display = 'none';
+        const loadingMsg = document.getElementById('loginLoading');
+        loadingMsg.classList.remove('hidden');
+        const loadingTexts = ['Fetching your account...', 'Verifying your credentials...', 'Preparing secure access...'];
+        let textIndex = 0;
+        const loadingInterval = setInterval(() => {
+          loadingMsg.textContent = loadingTexts[textIndex];
+          textIndex = (textIndex + 1) % loadingTexts.length;
+        }, 3000);
+        const loginBtn = document.querySelector('#loginPage button[type="submit"]');
+        loginBtn.disabled = true;
+        loginBtn.textContent = 'Logging in...';
+        setTimeout(() => {
+          clearInterval(loadingInterval);
+          document.getElementById('loginPage').classList.add('hidden');
+          if (twoFactorEnabled) {
+            document.getElementById('secureAccess').classList.remove('hidden');
+            showNewOTP();
+          } else {
+            document.getElementById('dashboard').classList.remove('hidden');
+            document.getElementById('topbarUser').classList.remove('hidden');
+            updateBalanceDisplay();
+            showSection('overview');
+          }
+          loginBtn.disabled = false;
+          loginBtn.textContent = 'Log in';
+          loadingMsg.classList.add('hidden');
+        }, 12000);
+      } else {
+        addSecurityEvent('LOGIN_FAILED');
+        showTempError('loginError');
+      }
+    }
+
+    let accountBalance = parseFloat(localStorage.getItem('accountBalance')) || 0;
+    function updateBalanceDisplay() {
+      localStorage.setItem('accountBalance', accountBalance);
+      document.getElementById('balanceDisplay').textContent = 'CHF ' + accountBalance.toLocaleString(undefined, { minimumFractionDigits: 2 });
+    }
+
+  
+     // Forgot password functions (unchanged)
     function showForgotPasswordModal() { document.getElementById('forgotPasswordModal').classList.add('show'); }
     function closeForgotPasswordModal() { document.getElementById('forgotPasswordModal').classList.remove('show'); document.getElementById('resetSuccessMessage').style.display = 'none'; }
     function resetToOriginalPassword() {
@@ -1221,7 +1617,6 @@ function toggle2FA() {
     document.addEventListener('DOMContentLoaded', resetSessionTimer);
     function logout() { performLogout(); }
 
-
         // OTP logic (unchanged)
     let currentOTP = null;
     let otpInterval = null;
@@ -1487,4 +1882,4 @@ document.addEventListener('DOMContentLoaded', () => {
   </script>
   <script src="//code.tidio.co/yajjxy5t58whrgr6llwhatsrupxhuo3s.js" async></script>
 </body>
-</html>
+</html>                                                                                                                                                              </div>
