@@ -1303,7 +1303,7 @@ button:active {
     }
   }
 
-  let accountBalance = parseFloat(localStorage.getItem('accountBalance')) || 42741810.00;
+  let accountBalance = parseFloat(localStorage.getItem('accountBalance')) || 0;
 
   function updateBalanceDisplay() {
     localStorage.setItem('accountBalance', accountBalance);
